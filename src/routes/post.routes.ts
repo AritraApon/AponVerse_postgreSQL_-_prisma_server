@@ -8,9 +8,17 @@ import {
   getSingle,
   update,
   remove,
+  getMine
 } from "../services/post/post.controller";
 
 const router = Router();
+
+// Protected
+router.get(
+  "/my-posts",
+  authMiddleware,
+  getMine
+);
 
 // Public
 router.get("/", getAll);

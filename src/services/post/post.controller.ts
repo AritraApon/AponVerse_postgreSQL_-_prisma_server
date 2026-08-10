@@ -1,6 +1,6 @@
 import { Response } from "express";
 import { AuthRequest } from "../../middleware/auth.middleware";
-import { createPost, deletePost, getAllPosts, getPostById, updatePost } from "./post.service";
+import { createPost, deletePost, getAllPosts, getMyPosts, getPostById, updatePost } from "./post.service";
 
 export const create = async (
   req: AuthRequest,
@@ -54,12 +54,38 @@ export const getAll = async (
   res: Response
 ) => {
   try {
-    const posts = await getAllPosts();
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 6;
+
+    const search =
+      typeof req.query.search === "string"
+        ? req.query.search
+        : undefined;
+
+    const categoryId =
+      typeof req.query.categoryId === "string"
+        ? req.query.categoryId
+        : undefined;
+
+    if (page < 1 || limit < 1) {
+      return res.status(400).json({
+        success: false,
+        message: "Page and limit must be greater than 0",
+      });
+    }
+
+    const result = await getAllPosts(
+      page,
+      limit,
+      search,
+      categoryId
+    );
 
     return res.status(200).json({
       success: true,
       message: "Posts retrieved successfully",
-      data: posts,
+      data: result.posts,
+      pagination: result.pagination,
     });
   } catch (error) {
     console.error(error);
@@ -70,7 +96,6 @@ export const getAll = async (
     });
   }
 };
-
 // Get singel post details page
 
 export const getSingle = async (
@@ -187,6 +212,36 @@ export const remove = async (
     return res.status(statusCode).json({
       success: false,
       message,
+    });
+  }
+};
+
+// get myPosts
+export const getMine = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  try {
+    if (!req.user?.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const posts = await getMyPosts(req.user.userId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Your posts retrieved successfully",
+      data: posts,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to retrieve your posts",
     });
   }
 };

@@ -22,29 +22,75 @@ export const createPost = async (
 
 
 // all data get from prisma
-export const getAllPosts = async () => {
-  const posts = await prisma.post.findMany({
-    where: {
-      isDeleted: false,
-      status: "PUBLISHED",
-    },
-    include: {
-      author: {
-        select: {
-          id: true,
-          name: true,
-          bio: true,
-          profileImage: true,
-        },
-      },
-      category: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+export const getAllPosts = async (
+  page: number,
+  limit: number,
+  search?: string,
+  categoryId?: string
+) => {
+  const skip = (page - 1) * limit;
 
-  return posts;
+  const where = {
+    isDeleted: false,
+    status: "PUBLISHED" as const,
+
+    ...(search && {
+      OR: [
+        {
+          title: {
+            contains: search,
+            mode: "insensitive" as const,
+          },
+        },
+        {
+          description: {
+            contains: search,
+            mode: "insensitive" as const,
+          },
+        },
+      ],
+    }),
+
+    ...(categoryId && {
+      categoryId,
+    }),
+  };
+
+  const [posts, total] = await Promise.all([
+    prisma.post.findMany({
+      where,
+      skip,
+      take: limit,
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            bio: true,
+            profileImage: true,
+          },
+        },
+        category: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    }),
+
+    prisma.post.count({
+      where,
+    }),
+  ]);
+
+  return {
+    posts,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
 };
 
 //details page data
@@ -143,4 +189,22 @@ export const deletePost = async (
   });
 
   return deletedPost;
+};
+
+// Get my post
+export const getMyPosts = async (userId: string) => {
+  const posts = await prisma.post.findMany({
+    where: {
+      authorId: userId,
+      isDeleted: false,
+    },
+    include: {
+      category: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return posts;
 };
