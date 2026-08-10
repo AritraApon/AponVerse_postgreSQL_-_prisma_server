@@ -30,6 +30,8 @@ model User {
   updatedAt     DateTime   @updatedAt
 
   posts         Post[]
+  comments  Comment[]
+reactions  Reaction[]
 
   @@index([email])
   @@map("users")
@@ -62,8 +64,49 @@ model Post {
   author      User       @relation(fields: [authorId], references: [id])
   category    Category?  @relation(fields: [categoryId], references: [id])
 
+  comments  Comment[]
+reactions Reaction[]
+
   @@index([authorId])
   @@index([categoryId])
   @@index([status])
   @@map("posts")
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  authorId  String
+  postId    String
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author User @relation(fields: [authorId], references: [id])
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+  @@index([authorId])
+  @@map("comments")
+}
+
+
+model Reaction {
+  id        String   @id @default(uuid())
+  userId    String
+  postId    String
+  type      ReactionType @default(LIKE)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@index([postId])
+  @@map("reactions")
+}
+
+
+enum ReactionType {
+  LIKE
 }

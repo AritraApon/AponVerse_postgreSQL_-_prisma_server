@@ -6,6 +6,9 @@ import {authMiddleware,AuthRequest,} from "./middleware/auth.middleware";
 import postRoutes from "./routes/post.routes";
 import userRoutes from "./routes/user.routes";
 import categoryRoutes from "./routes/category.routes";
+import commentRoutes from "./routes/comment.routes";
+
+
 
 const app = express();
 
@@ -16,6 +19,7 @@ app.use("/api/auth", authRoutes);
 app.use('/api/posts',postRoutes)
 app.use("/api/users", userRoutes);
 app.use("/api/categories", categoryRoutes);
+app.use("/api/comments",commentRoutes);
 
 app.get("/", (req, res) => {
   res.json({
