@@ -1,6 +1,6 @@
 import { Response } from "express";
 import { AuthRequest } from "../../middleware/auth.middleware";
-import { createPost, getAllPosts, getPostById, updatePost } from "./post.service";
+import { createPost, deletePost, getAllPosts, getPostById, updatePost } from "./post.service";
 
 export const create = async (
   req: AuthRequest,
@@ -165,7 +165,7 @@ export const remove = async (
     }
 
     await deletePost(
-      id,
+      id as string,
       req.user.userId
     );
 
