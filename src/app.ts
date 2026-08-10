@@ -1,11 +1,22 @@
 import express from "express";
 import cors from "cors";
 import { prisma } from "./lib/prisma";
+import authRoutes from "./routes/auth.routes";
+import {
+  authMiddleware,
+  AuthRequest,
+} from "./middleware/auth.middleware";
+import postRoutes from "./routes/post.routes";
+
+
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+app.use("/api/auth", authRoutes);
+app.use('/api/posts',postRoutes)
 
 app.get("/", (req, res) => {
   res.json({
@@ -33,5 +44,19 @@ app.get("/test-db", async (req, res) => {
     });
   }
 });
+
+app.get(
+  "/protected",
+  authMiddleware,
+  (req: AuthRequest, res) => {
+    res.json({
+      success: true,
+      message: "You are authenticated!",
+      user: req.user,
+    });
+  }
+);
+
+
 
 export default app;
