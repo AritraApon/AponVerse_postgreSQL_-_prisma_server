@@ -11,15 +11,14 @@ export const createPost = async (
     data: {
       title,
       description,
-      image,
       authorId,
-      categoryId,
+      ...(image !== undefined && { image }),
+      ...(categoryId !== undefined && { categoryId }),
     },
   });
 
   return post;
 };
-
 
 // all data get from prisma
 export const getAllPosts = async (
