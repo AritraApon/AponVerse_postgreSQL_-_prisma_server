@@ -6,6 +6,10 @@ Backend API for **AponVerse**, a full-stack blogging platform built with **Node.
 
 **Production API:**
 https://aponverse-postgresql-prisma-server.onrender.com
+---
+**Live Project:**
+https://apon-blog-next-js-ts-postgre-sql.vercel.app
+---
 
 ## 🛠️ Tech Stack
 
